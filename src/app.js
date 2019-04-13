@@ -5,6 +5,8 @@ const hbs = require('hbs')
 const helpers = require('./helpers')
 const bodyParser = require('body-parser') //de express
 
+const port = process.env.PORT || 3000;
+
 const cursos = require('./cursos')
 const cursosUsuarios = require('./cursosUsuarios')
 const {data, respuestaAlertHtml} = require('./funciones')
@@ -128,4 +130,4 @@ app.get('*', (req, res) => {
     res.render('error')
 });
 
-app.listen(3000, ()=> console.log('Escuchando en puerto 3000'))
+app.listen(port, () => console.log('Escuchando en puerto ' + port))
