@@ -3,7 +3,7 @@ const stores = funciones.stores
 const data = funciones.data
 const cursos = require('./cursos')
 const usuarios = require('./usuarios')
-const Respuesta = require('./Respuesta')
+const Respuesta = require('./dtos/Respuesta')
 
 const cargar = () => funciones.listar(stores.CURSOS_USUARIOS)
 

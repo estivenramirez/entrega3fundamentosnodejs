@@ -1,5 +1,5 @@
 const hbs = require('hbs')
-const cursos = require('./cursos')
+const cursos = require('./../cursos')
 
 hbs.registerHelper('listarCursos', () => {
     return cursos.mostrarTablaHtml()

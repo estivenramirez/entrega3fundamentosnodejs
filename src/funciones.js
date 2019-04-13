@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const Respuesta = require('./Respuesta')
+const Respuesta = require('./dtos/Respuesta')
 
 var data = {
     cursos:         [],

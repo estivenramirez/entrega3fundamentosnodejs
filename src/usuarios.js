@@ -1,7 +1,7 @@
 const funciones = require('./funciones')
 const stores = funciones.stores
 const data = funciones.data
-const Respuesta = require('./Respuesta')
+const Respuesta = require('./dtos/Respuesta')
 
 const crear = (usuario) => {
 
