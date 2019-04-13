@@ -1,9 +1,4 @@
 const hbs = require('hbs')
-const cursos = require('./../cursos')
-
-hbs.registerHelper('listarCursos', () => {
-    return cursos.mostrarTablaHtml()
-})
 
 hbs.registerHelper('respuestaAlertHtml', (respuesta) => {
     if(!respuesta) {

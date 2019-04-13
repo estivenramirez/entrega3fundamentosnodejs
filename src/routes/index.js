@@ -16,7 +16,8 @@ const dirViews = path.join(__dirname , '../../template/views')
 const dirPartials = path.join(__dirname , '../../template/partials')
 
 //Models
-// const Estudiante = require('./../models/estudiante')
+const Curso = require('./../models/curso')
+const Usuario = require('./../models/usuario')
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json())
@@ -26,14 +27,10 @@ app.set('views', dirViews)
 hbs.registerPartials(dirPartials)
 
 app.get('/', (req, res) => {
-    cursos.listar()
-    res.render('index', {
-        cursos: data.cursos
-    })
+    res.render('index')
 });
 
 app.get('/cursos/crear', (req, res) => {
-    cursos.listar()
     res.render('cursos/crear', {
         curso: {},
         respuesta: ''
@@ -42,45 +39,106 @@ app.get('/cursos/crear', (req, res) => {
 
 app.post('/crearCurso', (req, res) => {
 
-    let body = req.body
+    let curso =  new Curso ({
+        nombre:             req.body.nombre,
+        descripcion:        req.body.descripcion,
+        valor:              req.body.valor,
+        modalidad:          req.body.modalidad,
+        intensidadHoraria:  req.body.intensidadHoraria
+    })
 
-    let curso = {
-        id:                 body.id,
-        nombre:             body.nombre,
-        descripcion:        body.descripcion,
-        valor:              body.valor,
-        modalidad:          body.modalidad,
-        intensidadHoraria:  body.intensidadHoraria
-    }
+    curso.save((err, result)=>{
 
-    let respuesta = cursos.crear(curso);
-    if(respuesta.success) {
-        res.render('cursos/crear',  {
-            respuesta: respuesta
-        })
-    } else {
+        let respuesta
+        let cursoR = {}
+
+        if(!err) {
+            respuesta = new Respuesta(true, `Se ha creado el curso ${result.nombre}`);
+        } else {
+            console.log(err)
+            respuesta = new Respuesta(false, err)
+            cursoR = curso
+        }
+
         res.render('cursos/crear',  {
             respuesta: respuesta,
-            curso: curso
+            curso: cursoR
         })
-    }
+
+    })
 
 });
 
 app.get('/crearCurso', (req, res) => res.redirect('cursos/crear') );
 
 app.get('/cursos/verInteresado', (req, res) => {
-    res.render('cursos/verInteresado', {
-        cursosDisponibles: cursos.listarCursosDisponibles()
+
+    Curso.find({estado:'disponible'}, (err, result)=> {
+        if(err)
+            return console.log(err)
+
+        res.render('cursos/verInteresado', {
+            cursosDisponibles: result
+        })
     })
+
 });
 
 app.get('/cursos/verCoordinador', (req, res) => {
-    res.render('cursos/verCoordinador')});
 
-app.patch('/cambiarEstadoCurso', (req, res)=>{
-    let body = req.body
-    res.send(cursos.modificarEstado(body.idCurso, body.estado))
+    Curso.find({}, (err, result) => {
+
+        if(err)
+          return  console.log(err)
+        
+        res.render('cursos/verCoordinador', { 
+        tablaListaCursos : 
+        `<table class="table table-striped" style="width:100%">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Valor</th>
+                    <th>Modalidad</th>
+                    <th>Intensidad Horaria</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${result.map(c => 
+                   `<tr>
+                    <td>${c.nombre}</td>
+                    <td>${c.descripcion}</td>
+                    <td>${c.valor}</td>
+                    <td>${c.modalidad != undefined ? c.modalidad : ''}</td>
+                    <td>${c.intensidadHoraria != undefined ? c.intensidadHoraria : ''}</td>
+                    <td><input class="estado" type="checkbox"  ${c.estado == 'disponible'? 'checked' : ''} data-size="sm" data-width="90" data-toggle="toggle" data-on="disponible" data-off="cerrado" data-onstyle="success" data-offstyle="danger"></td>
+                    <input type="hidden" name="idCurso" value="${c._id}">
+                    </td>
+                    </tr>`
+                ).join('')}
+            </tbody>
+        </table>`
+
+        })
+    })
+   
+});
+
+app.patch('/cambiarEstadoCurso', (req, res) => {
+
+    Curso.findByIdAndUpdate(req.body.idCurso, {estado: req.body.estado}, (err, result) => {
+        let respuesta
+        if(err) {
+            console.log(err)
+            respuesta = new Respuesta(false, 'Ocurrió un error al cambiar el estado del curso')
+        } else {
+            console.log(result)
+            respuesta = new Respuesta(true, 'Se modificó el estado')
+        } 
+        res.send(respuesta)
+    })
+
 })
 
 app.get('/cursos/inscribir', (req, res) => {

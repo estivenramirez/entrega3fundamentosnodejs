@@ -1,3 +1,5 @@
+require('./config/config');
+
 const express = require('express')
 const app = express()
 const path = require('path')
@@ -5,8 +7,6 @@ const helpers = require('./helpers/helpers')
 const bodyParser = require('body-parser') //de express
 const session = require('express-session')
 const mongoose = require('mongoose');
-
-const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, '../public')))
 
@@ -27,6 +27,7 @@ app.use(session({
   }))
 
 app.use((req, res, next) => {
+    res.locals.nombreAplicacion = "Entrega #3"
     // if(req.session.usuario) {
     //     res.locals.sesion = true;
     //     res.locals.nombre = req.session.nombre;
@@ -40,11 +41,11 @@ app.use(bodyParser.json())
 //Routes
 app.use(require('./routes/index'))
 
-// mongoose.connect('mongodb://localhost:27017/asignaturas', {useNewUrlParser: true}, (error, result)=> {
-//     if(error)
-//         return console.log(error)
-//     else 
-//         return console.log('Conectado')    
-// })
+mongoose.connect(process.env.URLDB, {useNewUrlParser: true}, (err, result) => {
+	if (err){
+		return console.log(error)
+	}
+	console.log("conectado")
+});
 
-app.listen(port, () => console.log('Escuchando en puerto ' + port))
+app.listen(process.env.PORT, () => console.log('Escuchando en puerto ' + process.env.PORT))
