@@ -167,18 +167,86 @@ app.post('/inscribirCurso', (req, res) => {
         })
 });
 
-app.get('/inscribirCurso', (req, res) => res.redirect('cursos/inscribir') );
+app.get('/inscribirCurso', (req, res) => res.redirect('cursos/inscribir'));
 
 app.get('/cursos/verInscritos', (req, res) => {
-    res.render('cursos/verInscritos', {
-        cursosYUsuarios: cursosUsuarios.cursosUsuariosDisponibles()
+
+    Curso.find({estado: "disponible"})
+    .populate('estudiantes')
+    .sort('nombre')
+    .exec((err, result) => {
+        if(err)
+            return console.log(err)
+
+        res.render('cursos/verInscritos', {
+            cursos: result
+        })
     })
+
 });
 
 app.post('/eliminarCursoUsuario', (req, res) => {
+
+    // Curso.update({_id:req.body.idCurso})
+
     let body = req.body
     res.send(cursosUsuarios.eliminarCursoUsuario(body.idCurso, body.docUsuario))
 });
+
+app.get('/usuarios/registrar', (req, res) => res.render('usuarios/registro') );
+
+app.post('/registro', (req, res) => {
+
+    let usuario = new Usuario({
+        documento: req.body.documento,
+        nombre: req.body.nombre,
+        correo: req.body.correo,
+        telefono: req.body.telefono
+    })
+
+    if(req.body.rol != null && req.body.rol != '') {
+        usuario.rol = req.body.rol
+    }
+
+    if(req.body.password === req.body.passwordAgain) {
+        usuario.password = bcrypt.hashSync(req.body.password, 10)
+    } else {
+        res.render('usuarios/registro', {
+            respuesta: new Respuesta(false, "Las contraseñas no coinciden."),
+            documento: req.body.documento,
+            nombre: req.body.nombre,
+            correo: req.body.correo,
+            telefono: req.body.telefono,
+            rol: req.body.rol,
+            password: req.body.password,
+            passwordAgain: req.body.passwordAgain
+        })
+    }
+
+    usuario.save((err, result) => {
+        if(err) {
+            console.log(err)
+            res.render('usuarios/registro', {
+                respuesta: new Respuesta(false, err),
+                documento: req.body.documento,
+                nombre: req.body.nombre,
+                correo: req.body.correo,
+                telefono: req.body.telefono,
+                rol: req.body.rol,
+                password: req.body.password,
+                passwordAgain: req.body.passwordAgain
+            })
+        } else {
+            res.render('respuesta', {
+                respuesta: new Respuesta(true, `Se registro usuario con nombre  ${result.nombre}`)
+            })
+
+        }
+
+    })
+
+});
+
 
 app.get('*', (req, res) => {
     res.render('error')

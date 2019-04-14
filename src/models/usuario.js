@@ -3,21 +3,23 @@ var uniqueValidator = require('mongoose-unique-validator');
 const Schema = mongoose.Schema;
  
 const usuarioSchema = new Schema({
+
+    _id: Schema.Types.ObjectId,
+
     documento: {
         type: String,
         required: true,
         trim: true,
         unique: true,
         validate : {
-            validator : Number.isInteger,
+            validator : (v) => /^\d+$/.test(v),
             message   : '{VALUE} no es un valor numérico'
-          }
+        }
     },
     nombre: {
         type: String,
         required: true,
         trim: true,
-        // minlength: 2
     },
     correo: {
         type: String,
@@ -34,9 +36,9 @@ const usuarioSchema = new Schema({
         required: true,
         trim: true,
         validate : {
-            validator : Number.isInteger,
+            validator : (v) => /^\d+$/.test(v),
             message   : '{VALUE} no es un valor numérico'
-          }
+        }
     },
     rol: {
         type: String,
@@ -48,10 +50,10 @@ const usuarioSchema = new Schema({
         type: String,
         required: true,
         trim: true
-    }
+    },
 });
 
-usuarioSchema.plugin(uniqueValidator);
+usuarioSchema.plugin(uniqueValidator, { message: 'Error, ya existe un usuario con {PATH} {VALUE}' });
 
 const Usuario = mongoose.model('Usuario', usuarioSchema)
 

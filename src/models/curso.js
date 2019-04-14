@@ -3,6 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 const Schema = mongoose.Schema;
  
 const cursoSchema = new Schema({
+
     nombre: {
         type: String,
         required: true,
@@ -33,6 +34,8 @@ const cursoSchema = new Schema({
         default: 'disponible',
         required: true
     },
+    estudiantes: [{ type: Schema.Types.ObjectId, ref: 'Usuario' }]
+
 });
 
 cursoSchema.plugin(uniqueValidator);
