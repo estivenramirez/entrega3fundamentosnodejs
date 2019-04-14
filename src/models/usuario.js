@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
  
 const usuarioSchema = new Schema({
 
-    _id: Schema.Types.ObjectId,
+    // _id: Schema.Types.ObjectId,
 
     documento: {
         type: String,

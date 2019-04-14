@@ -5,9 +5,6 @@ const hbs = require('hbs')
 const bodyParser = require('body-parser') //de express
 const bcrypt = require('bcrypt');
 
-const cursos = require('./../cursos')
-const cursosUsuarios = require('./../cursosUsuarios')
-const {data, respuestaAlertHtml} = require('./../funciones')
 const Respuesta = require('../dtos/Respuesta')
 
 const helpers = require('../helpers/helpers')
@@ -142,29 +139,39 @@ app.patch('/cambiarEstadoCurso', (req, res) => {
 })
 
 app.get('/cursos/inscribir', (req, res) => {
-    res.render('cursos/inscribir', {
-        cursosDisponibles: cursos.listarCursosDisponibles()
+
+    Curso.find({"estado": "disponible"}, (err, result) => {
+
+        if(err)
+          return  console.log(err)
+        
+        res.render('cursos/inscribir', {
+            cursosDisponibles : result
+        })
+
     })
 });
 
 app.post('/inscribirCurso', (req, res) => {
 
-    let body = req.body
-    let usuario = {
-        documento:          body.documento,
-        nombre:             body.nombre,
-        correo:             body.correo,
-        telefono:           body.telefono,
-    }
-    let idCurso = body.idCurso;
-    let respuesta = cursosUsuarios.inscribir(idCurso, usuario)
+    Curso.findOne({"_id":req.body.idCurso, "estudiantes": "5cb29e528c73fd2fd40894cd"}, (err, result) => {
+        if(err)
+            return console.log(err)
 
-        res.render('cursos/inscribir',  {
-            respuesta: respuesta,
-            cursosDisponibles: cursos.listarCursosDisponibles(),
-            usuario: usuario,
-            idCurso: respuesta.success ? '' : idCurso
-        })
+        if(result) {
+
+            Curso.find({"estado": "disponible"}, (err, resp) => {
+                if(err) return  console.log(err)
+                res.render('cursos/inscribir', {respuesta: new Respuesta(false, `El aspirante ya está inscrito en el curso "${result.nombre}"`), cursosDisponibles : resp, idCurso: req.body.idCurso })
+            })
+
+        } else {
+            Curso.findByIdAndUpdate(req.body.idCurso, {$push: {"estudiantes": "5cb29e528c73fd2fd40894cd"}}, {'new': true}, (err, resp) => {
+                if(err) return console.log(err)
+                res.render('respuesta',  {respuesta: new Respuesta(true, `Aspirante inscrito al curso "${resp.nombre}" con éxito`) })
+            })
+        }
+    })
 });
 
 app.get('/inscribirCurso', (req, res) => res.redirect('cursos/inscribir'));
@@ -187,10 +194,17 @@ app.get('/cursos/verInscritos', (req, res) => {
 
 app.post('/eliminarCursoUsuario', (req, res) => {
 
-    // Curso.update({_id:req.body.idCurso})
+    console.log(`idCurso ${req.body.idCurso} idEstudiante ${req.body.idUsuario}`)
 
-    let body = req.body
-    res.send(cursosUsuarios.eliminarCursoUsuario(body.idCurso, body.docUsuario))
+    Curso.findByIdAndUpdate(req.body.idCurso, {$pull: {"estudiantes": req.body.idUsuario}}, {'new': true}, (err, result) => {
+        if(err)
+            return console.log(err)
+        
+        console.log(result)
+
+        res.send(new Respuesta(true, 'Estudiante eliminado del curso'))
+    })
+
 });
 
 app.get('/usuarios/registrar', (req, res) => res.render('usuarios/registro') );
