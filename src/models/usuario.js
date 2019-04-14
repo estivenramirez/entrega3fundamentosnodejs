@@ -40,6 +40,12 @@ const usuarioSchema = new Schema({
             message   : '{VALUE} no es un valor numérico'
         }
     },
+    usuario: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true,
+    },
     rol: {
         type: String,
         enum: {values: ['ASPIRANTE', 'COORDINADOR'], message: 'El role no es válido'},
@@ -53,7 +59,7 @@ const usuarioSchema = new Schema({
     },
 });
 
-usuarioSchema.plugin(uniqueValidator, { message: 'Error, ya existe un usuario con {PATH} {VALUE}' });
+usuarioSchema.plugin(uniqueValidator, { message: 'Error, ya existe {PATH} {VALUE}' });
 
 const Usuario = mongoose.model('Usuario', usuarioSchema)
 

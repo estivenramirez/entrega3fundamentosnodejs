@@ -28,10 +28,11 @@ app.use(session({
 
 app.use((req, res, next) => {
     res.locals.nombreAplicacion = "Entrega #3"
-    // if(req.session.usuario) {
-    //     res.locals.sesion = true;
-    //     res.locals.nombre = req.session.nombre;
-    // }
+    if(req.session.usuario) {
+        res.locals.se_sesion = true
+        res.locals.se_nombre = req.session.nombre
+        res.locals.se_rol = req.session.rol
+    }
     next()
 })
 
