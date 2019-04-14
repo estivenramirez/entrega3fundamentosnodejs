@@ -49,6 +49,20 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
+                  <label for="nombre">Usuario</label>
+                  <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Username" value="{{usuario}}" required="">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="modalidad">Rol</label>
+                  <select class="custom-select d-block w-100" id="rol" name="rol">
+                    <option value="">Seleccione...</option>
+                    <option>ASPIRANTE</option>
+                    <option>COORDINADOR</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
                   <label for="valor">Contraseña</label>
                   <input type="password" class="form-control" id="password" name="password" placeholder="" value="{{password}}" required="">
                 </div>
@@ -58,16 +72,6 @@
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="modalidad">Rol</label>
-                  <select class="custom-select d-block w-100" id="modalidad" name="modalidad">
-                    <option value="">Seleccione...</option>
-                    <option>ASPIRANTE</option>
-                    <option>COORDINADOR</option>
-                  </select>
-                </div>
-              </div>
               <hr class="mb-4">
               <div class="row justify-content-md-center mb-5">
                 <div class="col-md-3">
@@ -109,9 +113,13 @@
                         required: true,
                         digits: true
                     },
+                    usuario: {
+                        required: true,
+                        minlength: 5
+                    },
                     password: {
                         required: true,
-                        min: 5
+                        minlength: 5
                     },
                     passwordAgain: {
                         equalTo: "#password"
@@ -129,6 +137,10 @@
                     telefono: {
                         required: "El telefono es obligatorio.",
                         digits: "Ingrese sólo números.",
+                    },
+                    usuario: {
+                        required: "El ususario es obligatorio.",
+                        minlength: "Debe tener una longitud mínima de 5",
                     },
                     password: {
                         required: "La contraseña es obligatoria.",
