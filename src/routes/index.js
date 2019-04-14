@@ -68,58 +68,52 @@ app.post('/crearCurso', (req, res) => {
 
 app.get('/crearCurso', (req, res) => res.redirect('cursos/crear') );
 
-app.get('/cursos/verInteresado', (req, res) => {
+app.get('/cursos/ver', (req, res) => {
 
-    Curso.find({estado:'disponible'}, (err, result)=> {
-        if(err)
-            return console.log(err)
+    if(req.session.rol == 'COORDINADOR') {
 
-        res.render('cursos/verInteresado', {
-            cursosDisponibles: result
+        Curso.find({}, (err, result) => {
+
+            if(err) return  console.log(err)
+            
+            res.render('cursos/verCoordinador', { 
+            tablaListaCursos : 
+            `<table class="table table-striped" style="width:100%">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Valor</th>
+                        <th>Modalidad</th>
+                        <th>Intensidad Horaria</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map(c => 
+                       `<tr>
+                        <td>${c.nombre}</td>
+                        <td>${c.descripcion}</td>
+                        <td>${c.valor}</td>
+                        <td>${c.modalidad != undefined ? c.modalidad : ''}</td>
+                        <td>${c.intensidadHoraria != undefined ? c.intensidadHoraria : ''}</td>
+                        <td><input class="estado" type="checkbox"  ${c.estado == 'disponible'? 'checked' : ''} data-size="sm" data-width="90" data-toggle="toggle" data-on="disponible" data-off="cerrado" data-onstyle="success" data-offstyle="danger"></td>
+                        <input type="hidden" name="idCurso" value="${c._id}">
+                        </td>
+                        </tr>`
+                    ).join('')}
+                </tbody>
+            </table>`
+    
+            })
         })
-    })
-
-});
-
-app.get('/cursos/verCoordinador', (req, res) => {
-
-    Curso.find({}, (err, result) => {
-
-        if(err)
-          return  console.log(err)
-        
-        res.render('cursos/verCoordinador', { 
-        tablaListaCursos : 
-        `<table class="table table-striped" style="width:100%">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Valor</th>
-                    <th>Modalidad</th>
-                    <th>Intensidad Horaria</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${result.map(c => 
-                   `<tr>
-                    <td>${c.nombre}</td>
-                    <td>${c.descripcion}</td>
-                    <td>${c.valor}</td>
-                    <td>${c.modalidad != undefined ? c.modalidad : ''}</td>
-                    <td>${c.intensidadHoraria != undefined ? c.intensidadHoraria : ''}</td>
-                    <td><input class="estado" type="checkbox"  ${c.estado == 'disponible'? 'checked' : ''} data-size="sm" data-width="90" data-toggle="toggle" data-on="disponible" data-off="cerrado" data-onstyle="success" data-offstyle="danger"></td>
-                    <input type="hidden" name="idCurso" value="${c._id}">
-                    </td>
-                    </tr>`
-                ).join('')}
-            </tbody>
-        </table>`
-
+    }
+    else {
+        Curso.find({estado:'disponible'}, (err, result)=> {
+            if(err) return console.log(err)
+            res.render('cursos/verInteresado', { cursosDisponibles: result })
         })
-    })
-   
+    }
 });
 
 app.patch('/cambiarEstadoCurso', (req, res) => {
@@ -141,20 +135,15 @@ app.patch('/cambiarEstadoCurso', (req, res) => {
 app.get('/cursos/inscribir', (req, res) => {
 
     Curso.find({"estado": "disponible"}, (err, result) => {
-
-        if(err)
-          return  console.log(err)
-        
-        res.render('cursos/inscribir', {
-            cursosDisponibles : result
-        })
+        if(err) return  console.log(err)
+        res.render('cursos/inscribir', { cursosDisponibles : result })
 
     })
 });
 
 app.post('/inscribirCurso', (req, res) => {
 
-    Curso.findOne({"_id":req.body.idCurso, "estudiantes": "5cb29e528c73fd2fd40894cd"}, (err, result) => {
+    Curso.findOne({"_id":req.body.idCurso, "estudiantes": req.session.usuario}, (err, result) => {
         if(err)
             return console.log(err)
 
@@ -166,7 +155,7 @@ app.post('/inscribirCurso', (req, res) => {
             })
 
         } else {
-            Curso.findByIdAndUpdate(req.body.idCurso, {$push: {"estudiantes": "5cb29e528c73fd2fd40894cd"}}, {'new': true}, (err, resp) => {
+            Curso.findByIdAndUpdate(req.body.idCurso, {$push: {"estudiantes": req.session.usuario}}, {'new': true}, (err, resp) => {
                 if(err) return console.log(err)
                 res.render('respuesta',  {respuesta: new Respuesta(true, `Aspirante inscrito al curso "${resp.nombre}" con éxito`) })
             })
@@ -200,8 +189,6 @@ app.post('/eliminarCursoUsuario', (req, res) => {
         if(err)
             return console.log(err)
         
-        console.log(result)
-
         res.send(new Respuesta(true, 'Estudiante eliminado del curso'))
     })
 
@@ -215,7 +202,8 @@ app.post('/registro', (req, res) => {
         documento: req.body.documento,
         nombre: req.body.nombre,
         correo: req.body.correo,
-        telefono: req.body.telefono
+        telefono: req.body.telefono,
+        usuario: req.body.usuario
     })
 
     if(req.body.rol != null && req.body.rol != '') {
@@ -231,6 +219,7 @@ app.post('/registro', (req, res) => {
             nombre: req.body.nombre,
             correo: req.body.correo,
             telefono: req.body.telefono,
+            usuario: req.body.usuario,
             rol: req.body.rol,
             password: req.body.password,
             passwordAgain: req.body.passwordAgain
@@ -252,14 +241,52 @@ app.post('/registro', (req, res) => {
             })
         } else {
             res.render('respuesta', {
-                respuesta: new Respuesta(true, `Se registro usuario con nombre  ${result.nombre}`)
+                respuesta: new Respuesta(true, `Se registró "${result.nombre}" con usuario ${usuario}`)
             })
-
         }
-
     })
 
 });
+
+app.post('/ingresar', (req, res) => {
+
+    Usuario.findOne({usuario: req.body.usuario},  (err, result)=>{
+
+        if(err) {
+            return console.log(err)
+        }
+
+        if (!result || !bcrypt.compareSync(req.body.password, result.password)) {
+            return res.render('respuesta', { titulo: "Respuesta Ingresar", respuesta: new Respuesta(false, 'Usuario o contraseña incorrectos') })
+        }
+
+        //Con session
+        req.session.usuario = result._id
+        req.session.nombre  = result.nombre
+        req.session.rol  = result.rol
+
+        console.log(req.session)
+
+        res.render('respuesta', { 
+            titulo: "Respuesta Ingresar", 
+            respuesta: new Respuesta(true, `Bienvenido ${result.nombre}`),
+            se_sesion: true,
+            se_usuario : result._id,
+            se_nombre  : result.nombre,
+            se_rol  : result.rol
+           })
+
+    })
+    
+});
+
+app.get('/salir', (req, res) => {
+	req.session.destroy((err) => {
+  		if (err) return console.log(err) 	
+	})	
+    
+    res.redirect('/')	
+})
 
 
 app.get('*', (req, res) => {
