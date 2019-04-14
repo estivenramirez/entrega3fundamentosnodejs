@@ -14,7 +14,7 @@
             <h2>Cursos disponibles cambiar estado (Coordinador)</h2>
             </div>
             <div>
-            {{{listarCursos}}}
+            {{{tablaListaCursos}}}
             </div>
         </div>
     </main>
@@ -27,7 +27,7 @@
         $('input.estado').change(function() {
 
           let estado = $(this).is(':checked') ? 'disponible' : 'cerrado';
-          let idCurso = $(this).closest('tr').find('td').first().html()
+          let idCurso = $(this).closest('tr').find('input[name="idCurso"]').val()
 
             $.ajax({
                     data:  JSON.stringify({estado: estado, idCurso: idCurso}),
