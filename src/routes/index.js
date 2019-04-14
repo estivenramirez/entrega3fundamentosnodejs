@@ -235,13 +235,14 @@ app.post('/registro', (req, res) => {
                 nombre: req.body.nombre,
                 correo: req.body.correo,
                 telefono: req.body.telefono,
+                usuario: req.body.usuario,
                 rol: req.body.rol,
                 password: req.body.password,
                 passwordAgain: req.body.passwordAgain
             })
         } else {
             res.render('respuesta', {
-                respuesta: new Respuesta(true, `Se registró "${result.nombre}" con usuario ${usuario}`)
+                respuesta: new Respuesta(true, `Se registró "${result.nombre}" con usuario ${result.usuario}`)
             })
         }
     })
