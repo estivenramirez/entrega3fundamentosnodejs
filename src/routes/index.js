@@ -241,7 +241,7 @@ app.post('/registro', (req, res) => {
             })
         } else {
             res.render('respuesta', {
-                respuesta: new Respuesta(true, `Se registró "${result.nombre}" con usuario ${usuario}`)
+                respuesta: new Respuesta(true, `Se registró "${result.nombre}" con usuario ${result.usuario}`)
             })
         }
     })
