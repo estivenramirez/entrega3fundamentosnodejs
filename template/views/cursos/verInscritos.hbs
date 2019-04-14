@@ -14,13 +14,13 @@
           <h2>Cursos e Inscritos en curso (Coordinador)</h2>
         </div>
         <div class="card-columns">
-          {{#each cursosYUsuarios as |item index|}}
+          {{#each cursos as |item index|}}
             <div class="card">
-              <input value="{{item.curso.id}}" type="hidden">
+              <input value="{{item._id}}" type="hidden">
               <div class="card-header" id="heading{{index}}" data-toggle="collapse" data-target="#collapse{{index}}" aria-expanded="false" aria-controls="collapse{{index}}">
-                  <h5 class="card-title btn-link">{{item.curso.nombre}} ({{item.curso.id}})</h5>
-                  <h6 class="card-subtitle mb-2 text-muted">{{#if item.curso.valor}}{{item.valor}}{{else}}0{{/if}} COP</h6>
-                  <p class="card-text">{{item.curso.descripcion}}</p>
+                  <h5 class="card-title btn-link">{{item.nombre}}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">{{#if item.valor}}{{item.valor}}{{else}}0{{/if}} COP</h6>
+                  <p class="card-text">{{item.descripcion}}</p>
               </div>
 
               <div id="collapse{{index}}" class="collapse hide" aria-labelledby="heading{{index}}" data-parent="#heading{{index}}">
@@ -38,13 +38,14 @@
                         </tr>
                     </thead>
 
-                    {{#each item.usuarios as |usuario idx|}}
+                    {{#each item.estudiantes as |estudiante idx|}}
                             <tbody>
                                 <tr scope="row">
-                                    <td class="clsDocumento">{{usuario.documento}}</td>
-                                    <td>{{usuario.nombre}}</td>
-                                    <td>{{usuario.correo}}</td>
-                                    <td>{{usuario.telefono}}</td>
+                                    <td class="clsDocumento">{{estudiante.documento}}</td>
+                                    <td>{{estudiante.nombre}}</td>
+                                    <td>{{estudiante.correo}}</td>
+                                    <td>{{estudiante.telefono}}</td>
+                                     <input value="{{estudiante._id}}" type="hidden">
                                     <td><button class="btn btn-danger" onclick="eliminar(this)" title="Eliminar usuario de este curso">Eliminar</button></td>
                                 </tr>
                             </tbody>
@@ -75,10 +76,10 @@
 
         let $element = $(element)
         let idCurso = $(element).closest('.card').find('input').first().val()
-        let documento = $(element).closest('tr').find('.clsDocumento').html()
+        let documento = $(element).closest('tr').find('input').first().val()
 
         $.ajax({
-          data:  JSON.stringify({idCurso: idCurso, docUsuario: documento}),
+          data:  JSON.stringify({idCurso: idCurso, idUsuario: documento}),
           url:   '/eliminarCursoUsuario',
           type:  'post',
           contentType: 'application/json; charset=utf-8'
