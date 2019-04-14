@@ -235,6 +235,7 @@ app.post('/registro', (req, res) => {
                 nombre: req.body.nombre,
                 correo: req.body.correo,
                 telefono: req.body.telefono,
+                usuario: req.body.usuario,
                 rol: req.body.rol,
                 password: req.body.password,
                 passwordAgain: req.body.passwordAgain
